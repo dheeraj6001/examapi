@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Git post-receive hook — runs on the server after every push to master
+# Location on server: /var/repo/cloud-solutions.git/hooks/post-receive
+
+set -e
+
+REPO_DIR="/var/repo/cloud-solutions.git"
+APP_DIR="/var/www/cloud-solutions"
+BRANCH="master"
+PM2_APP="cloud-solutions-api"
+LOG_FILE="/var/log/cloud-solutions-deploy.log"
+
+# ─── read the pushed ref ──────────────────────────────────────────────────────
+while read oldrev newrev refname; do
+  PUSHED_BRANCH=$(git rev-parse --symbolic --abbrev-ref "$refname")
+
+  if [ "$PUSHED_BRANCH" != "$BRANCH" ]; then
+    echo "⚠  Pushed to '$PUSHED_BRANCH' — deployment only runs on '$BRANCH'. Skipping."
+    exit 0
+  fi
+
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "🚀 Deploying branch: $BRANCH"
+  echo "   Commit: $newrev"
+  echo "   Time:   $(date '+%Y-%m-%d %H:%M:%S')"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # ─── checkout latest code ─────────────────────────────────────────────────
+  echo "📂 Checking out code to $APP_DIR ..."
+  GIT_WORK_TREE="$APP_DIR" git checkout -f "$BRANCH"
+
+  # ─── install dependencies ─────────────────────────────────────────────────
+  echo "📦 Installing production dependencies ..."
+  cd "$APP_DIR"
+  npm ci --omit=dev --ignore-scripts
+
+  # ─── build ────────────────────────────────────────────────────────────────
+  echo "🔨 Building application ..."
+  npm run build
+
+  # ─── create logs dir ──────────────────────────────────────────────────────
+  mkdir -p "$APP_DIR/logs"
+
+  # ─── reload PM2 (zero-downtime) ───────────────────────────────────────────
+  echo "♻️  Reloading PM2 process ..."
+  if pm2 describe "$PM2_APP" > /dev/null 2>&1; then
+    pm2 reload "$PM2_APP" --update-env
+  else
+    echo "⚡ PM2 process not found — starting fresh ..."
+    pm2 start ecosystem.config.js --env production
+    pm2 save
+  fi
+
+  echo ""
+  echo "✅ Deployment complete!"
+  echo "   API: http://$(hostname -I | awk '{print $1}'):3000/api/v1/health"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+done 2>&1 | tee -a "$LOG_FILE"

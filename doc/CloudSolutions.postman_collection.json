@@ -1,0 +1,758 @@
+{
+  "info": {
+    "name": "CloudSolutions API",
+    "_postman_id": "cloud-solutions-api-v1",
+    "description": "Complete API collection for CloudSolutions — Public, Auth, Student, Admin, SuperAdmin panels",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",      "value": "http://localhost:3000/api/v1", "type": "string" },
+    { "key": "accessToken",  "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "userId",       "value": "", "type": "string" },
+    { "key": "studentId",    "value": "", "type": "string" },
+    { "key": "courseId",     "value": "", "type": "string" },
+    { "key": "enquiryId",    "value": "", "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔓 Public",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        },
+        {
+          "name": "List Published Courses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/courses?page=1&limit=10&search=&sortBy=createdAt&sortOrder=DESC",
+              "host": ["{{baseUrl}}"],
+              "path": ["courses"],
+              "query": [
+                { "key": "page",      "value": "1" },
+                { "key": "limit",     "value": "10" },
+                { "key": "search",    "value": "" },
+                { "key": "sortBy",    "value": "createdAt" },
+                { "key": "sortOrder", "value": "DESC" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Course by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["courses", "{{courseId}}"] }
+          }
+        },
+        {
+          "name": "Submit Enquiry",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1234567890\",\n  \"subject\": \"Admission enquiry for Math course\",\n  \"message\": \"I would like to know more about the admission process and prerequisites for joining the mathematics program.\",\n  \"type\": \"admission\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/enquiry", "host": ["{{baseUrl}}"], "path": ["enquiry"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔑 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "  pm.collectionVariables.set('accessToken',  res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  pm.collectionVariables.set('userId',       res.data.user._id);",
+                  "  console.log('Tokens saved.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"Password@123\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "  pm.collectionVariables.set('accessToken',  res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  pm.collectionVariables.set('userId',       res.data.user._id);",
+                  "  console.log('Logged in. Token saved.');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"Password@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get My Profile (me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "  pm.collectionVariables.set('accessToken',  res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🎓 Student Panel",
+      "item": [
+        {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "Get My Profile",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/student/profile", "host": ["{{baseUrl}}"], "path": ["student", "profile"] }
+              }
+            },
+            {
+              "name": "Update My Profile",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"grade\": \"11th\",\n  \"section\": \"B\",\n  \"address\": \"456 Oak Avenue, New York\",\n  \"guardianName\": \"Mary Doe\",\n  \"guardianPhone\": \"+9876543210\",\n  \"guardianEmail\": \"mary@example.com\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/student/profile", "host": ["{{baseUrl}}"], "path": ["student", "profile"] }
+              }
+            },
+            {
+              "name": "Update Account (name, phone)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Johnny\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+1112223333\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/student/profile/account", "host": ["{{baseUrl}}"], "path": ["student", "profile", "account"] }
+              }
+            },
+            {
+              "name": "Change Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"currentPassword\": \"Password@123\",\n  \"newPassword\": \"NewPassword@456\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/student/profile/change-password", "host": ["{{baseUrl}}"], "path": ["student", "profile", "change-password"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Courses",
+          "item": [
+            {
+              "name": "Browse Courses",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/student/courses?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["student", "courses"],
+                  "query": [
+                    { "key": "page",  "value": "1" },
+                    { "key": "limit", "value": "10" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "My Enrollments",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/student/courses/my-enrollments", "host": ["{{baseUrl}}"], "path": ["student", "courses", "my-enrollments"] }
+              }
+            },
+            {
+              "name": "Get Course Details",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/student/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["student", "courses", "{{courseId}}"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "🛠 Admin Panel",
+      "item": [
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "List All Users",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users?page=1&limit=10&search=&sortBy=createdAt&sortOrder=DESC",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "users"],
+                  "query": [
+                    { "key": "page",      "value": "1" },
+                    { "key": "limit",     "value": "10" },
+                    { "key": "search",    "value": "" },
+                    { "key": "sortBy",    "value": "createdAt" },
+                    { "key": "sortOrder", "value": "DESC" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "User Stats",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/users/stats", "host": ["{{baseUrl}}"], "path": ["admin", "users", "stats"] }
+              }
+            },
+            {
+              "name": "Get User by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}"] }
+              }
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"active\",\n  \"role\": \"student\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["admin", "users", "{{userId}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Students",
+          "item": [
+            {
+              "name": "List All Students",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/students?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "students"],
+                  "query": [
+                    { "key": "page",  "value": "1" },
+                    { "key": "limit", "value": "10" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Student Profile",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "if (res.data) pm.collectionVariables.set('studentId', res.data._id);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"grade\": \"10th\",\n  \"section\": \"A\",\n  \"dateOfBirth\": \"2005-01-15\",\n  \"address\": \"123 Main Street, New York\",\n  \"guardianName\": \"Mary Doe\",\n  \"guardianPhone\": \"+1234567890\",\n  \"guardianEmail\": \"mary@example.com\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/students", "host": ["{{baseUrl}}"], "path": ["admin", "students"] }
+              }
+            },
+            {
+              "name": "Student Stats",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/students/stats", "host": ["{{baseUrl}}"], "path": ["admin", "students", "stats"] }
+              }
+            },
+            {
+              "name": "Get Student by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["admin", "students", "{{studentId}}"] }
+              }
+            },
+            {
+              "name": "Update Student",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"grade\": \"11th\",\n  \"section\": \"B\",\n  \"status\": \"enrolled\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["admin", "students", "{{studentId}}"] }
+              }
+            },
+            {
+              "name": "Delete Student",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["admin", "students", "{{studentId}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Courses",
+          "item": [
+            {
+              "name": "List All Courses",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/courses?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "courses"],
+                  "query": [
+                    { "key": "page",  "value": "1" },
+                    { "key": "limit", "value": "10" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create Course",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "if (res.data) pm.collectionVariables.set('courseId', res.data._id);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Introduction to Mathematics\",\n  \"courseCode\": \"MATH-101\",\n  \"description\": \"A foundational math course covering algebra and geometry.\",\n  \"instructor\": \"Dr. Jane Smith\",\n  \"category\": \"Mathematics\",\n  \"level\": \"beginner\",\n  \"status\": \"draft\",\n  \"price\": 99.99,\n  \"maxStudents\": 30,\n  \"durationHours\": 40,\n  \"startDate\": \"2024-02-01\",\n  \"endDate\": \"2024-06-30\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/courses", "host": ["{{baseUrl}}"], "path": ["admin", "courses"] }
+              }
+            },
+            {
+              "name": "Course Stats",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/courses/stats", "host": ["{{baseUrl}}"], "path": ["admin", "courses", "stats"] }
+              }
+            },
+            {
+              "name": "Get Course by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["admin", "courses", "{{courseId}}"] }
+              }
+            },
+            {
+              "name": "Update Course",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Advanced Mathematics\",\n  \"price\": 149.99,\n  \"maxStudents\": 25\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["admin", "courses", "{{courseId}}"] }
+              }
+            },
+            {
+              "name": "Publish Course",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/courses/{{courseId}}/publish", "host": ["{{baseUrl}}"], "path": ["admin", "courses", "{{courseId}}", "publish"] }
+              }
+            },
+            {
+              "name": "Archive Course",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/courses/{{courseId}}/archive", "host": ["{{baseUrl}}"], "path": ["admin", "courses", "{{courseId}}", "archive"] }
+              }
+            },
+            {
+              "name": "Delete Course",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["admin", "courses", "{{courseId}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enquiries",
+          "item": [
+            {
+              "name": "List All Enquiries",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/enquiries?page=1&limit=10&sortOrder=DESC",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "enquiries"],
+                  "query": [
+                    { "key": "page",      "value": "1" },
+                    { "key": "limit",     "value": "10" },
+                    { "key": "sortOrder", "value": "DESC" },
+                    { "key": "status",    "value": "", "disabled": true },
+                    { "key": "type",      "value": "", "disabled": true },
+                    { "key": "search",    "value": "", "disabled": true }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Filter by Status (new)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/enquiries?status=new",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["admin", "enquiries"],
+                  "query": [{ "key": "status", "value": "new" }]
+                }
+              }
+            },
+            {
+              "name": "Enquiry Stats",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/stats", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "stats"] }
+              }
+            },
+            {
+              "name": "Get Enquiry by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/{{enquiryId}}", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "{{enquiryId}}"] }
+              }
+            },
+            {
+              "name": "Update Enquiry (notes/status/assign)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in_progress\",\n  \"adminNotes\": \"Contacted the student via email. Waiting for reply.\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/{{enquiryId}}", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "{{enquiryId}}"] }
+              }
+            },
+            {
+              "name": "Assign to Me",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/{{enquiryId}}/assign-me", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "{{enquiryId}}", "assign-me"] }
+              }
+            },
+            {
+              "name": "Resolve Enquiry",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/{{enquiryId}}/resolve", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "{{enquiryId}}", "resolve"] }
+              }
+            },
+            {
+              "name": "Close Enquiry",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/{{enquiryId}}/close", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "{{enquiryId}}", "close"] }
+              }
+            },
+            {
+              "name": "Delete Enquiry",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/admin/enquiries/{{enquiryId}}", "host": ["{{baseUrl}}"], "path": ["admin", "enquiries", "{{enquiryId}}"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "👑 Super Admin",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/superadmin/dashboard", "host": ["{{baseUrl}}"], "path": ["superadmin", "dashboard"] }
+          }
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "List All Users",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/superadmin/users?page=1&limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["superadmin", "users"],
+                  "query": [
+                    { "key": "page",  "value": "1" },
+                    { "key": "limit", "value": "10" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Create User (any role)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"New\",\n  \"lastName\": \"Admin\",\n  \"email\": \"newadmin@example.com\",\n  \"password\": \"Admin@12345\",\n  \"role\": \"admin\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/superadmin/users", "host": ["{{baseUrl}}"], "path": ["superadmin", "users"] }
+              }
+            },
+            {
+              "name": "Platform User Stats",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/superadmin/users/stats", "host": ["{{baseUrl}}"], "path": ["superadmin", "users", "stats"] }
+              }
+            },
+            {
+              "name": "Get User by ID",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/superadmin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["superadmin", "users", "{{userId}}"] }
+              }
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"admin\",\n  \"status\": \"active\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/superadmin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["superadmin", "users", "{{userId}}"] }
+              }
+            },
+            {
+              "name": "Delete User (hard)",
+              "request": {
+                "method": "DELETE",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/superadmin/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["superadmin", "users", "{{userId}}"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admins",
+          "item": [
+            {
+              "name": "Create Admin Account",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+                  { "key": "Content-Type",   "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Admin\",\n  \"lastName\": \"User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@12345\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/superadmin/admins", "host": ["{{baseUrl}}"], "path": ["superadmin", "admins"] }
+              }
+            },
+            {
+              "name": "Revoke Admin (demote to student)",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/superadmin/admins/{{userId}}/revoke", "host": ["{{baseUrl}}"], "path": ["superadmin", "admins", "{{userId}}", "revoke"] }
+              }
+            },
+            {
+              "name": "Elevate to Super Admin",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+                "url": { "raw": "{{baseUrl}}/superadmin/admins/{{userId}}/elevate", "host": ["{{baseUrl}}"], "path": ["superadmin", "admins", "{{userId}}", "elevate"] }
+              }
+            }
+          ]
+        }
+      ]
+    }
+
+  ]
+}
