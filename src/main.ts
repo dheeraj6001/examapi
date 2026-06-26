@@ -20,9 +20,10 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression());
 
-  // CORS
+  // CORS — `origin: true` reflects the request origin, required when credentials: true + wildcard
+  const isWildcard = corsOrigin.includes('*');
   app.enableCors({
-    origin: corsOrigin,
+    origin: isWildcard ? true : corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
